@@ -1,0 +1,18 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+
+# Backend targets
+Backend_pg/demo/target/
+Backend_pg/demo/.mvn/
+Backend_pg/demo/mvnw
+Backend_pg/demo/mvnw.cmd
+*.class
+*.jar
+
+# IDE files
+.idea/
+.vscode/
+*.iml
