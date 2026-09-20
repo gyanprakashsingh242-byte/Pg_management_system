@@ -1,17 +1,16 @@
 import axios from 'axios';
 
-// Vite environment variable check karega; agar nahi mila toh fallback Render backend par karega
-const rawBaseUrl =
-  import.meta.env.VITE_API_BASE_URL ||
-  'https://living-peace-backend.onrender.com/api/v1';
 
-// Trailing slash ko clean remove karega
-const API_BASE_URL = rawBaseUrl.endsWith('/')
-  ? rawBaseUrl.slice(0, -1)
-  : rawBaseUrl;
+const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://living-peace-backend.onrender.com/api/v1';
+
+
+const cleanBaseUrl = String(envUrl)
+  .replace(/[\[\]"']/g, '') 
+  .trim()
+  .replace(/\/+$/, '');     
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: cleanBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,11 +33,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      // 1. Wipe credentials
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-
-      // 2. Broadcast auth state change to React components
       window.dispatchEvent(new Event('auth:unauthorized'));
     }
     return Promise.reject(error);
