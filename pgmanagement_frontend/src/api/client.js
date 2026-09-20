@@ -1,8 +1,17 @@
-// src/api/client.js
 import axios from 'axios';
 
+// Vite environment variable check karega; agar nahi mila toh fallback Render backend par karega
+const rawBaseUrl =
+  import.meta.env.VITE_API_BASE_URL ||
+  'https://living-peace-backend.onrender.com/api/v1';
+
+// Trailing slash ko clean remove karega
+const API_BASE_URL = rawBaseUrl.endsWith('/')
+  ? rawBaseUrl.slice(0, -1)
+  : rawBaseUrl;
+
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -43,10 +52,14 @@ export const authApi = {
 
 // 2. Room & Utility Services
 export const roomApi = {
-  getRooms: (floor) => api.get('/rooms', { params: floor !== 'all' ? { floor } : {} }),
-  updateMeter: (roomNumber, currentMeter) => api.patch(`/rooms/${roomNumber}/meter`, { currentMeter }),
-  toggleStatus: (roomNumber) => api.patch(`/rooms/${roomNumber}/toggle-status`),
-  updateRent: (roomNumber, baseRent) => api.patch(`/rooms/${roomNumber}/rent`, { baseRent }),
+  getRooms: (floor) =>
+    api.get('/rooms', { params: floor !== 'all' ? { floor } : {} }),
+  updateMeter: (roomNumber, currentMeter) =>
+    api.patch(`/rooms/${roomNumber}/meter`, { currentMeter }),
+  toggleStatus: (roomNumber) =>
+    api.patch(`/rooms/${roomNumber}/toggle-status`),
+  updateRent: (roomNumber, baseRent) =>
+    api.patch(`/rooms/${roomNumber}/rent`, { baseRent }),
 };
 
 // 3. Resident Directory Services
@@ -67,7 +80,10 @@ export const exportReport = async (rate) => {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', `Living_Peace_Settlement_${new Date().toISOString().slice(0, 10)}.csv`);
+  link.setAttribute(
+    'download',
+    `Living_Peace_Settlement_${new Date().toISOString().slice(0, 10)}.csv`
+  );
   document.body.appendChild(link);
   link.click();
   link.remove();
