@@ -1,13 +1,16 @@
 import axios from 'axios';
 
+// Public API endpoint configuration
+const API_CONFIG = {
+  baseURL: 'https://living-peace-backend.onrender.com/api/v1',
+  timeout: 10000,
+};
 
-const envUrl = import.meta.env.VITE_API_BASE_URL || 'https://living-peace-backend.onrender.com/api/v1';
-
-
-const cleanBaseUrl = String(envUrl)
-  .replace(/[\[\]"']/g, '') 
+// Safe string normalization
+const cleanBaseUrl = String(API_CONFIG.baseURL)
+  .replace(/[\[\]"']/g, '')
   .trim()
-  .replace(/\/+$/, '');     
+  .replace(/\/+$/, '');
 
 const api = axios.create({
   baseURL: cleanBaseUrl,
