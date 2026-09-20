@@ -76,9 +76,23 @@ export default function RoomList() {
     try {
       setLoading(true);
       const res = await roomApi.getRooms(selectedFloor);
-      setRooms(res.data);
+      
+      // ✅ Array safety extraction:
+      let incomingData = [];
+      if (Array.isArray(res.data)) {
+        incomingData = res.data;
+      } else if (Array.isArray(res.data?.data)) {
+        incomingData = res.data.data;
+      } else if (Array.isArray(res.data?.content)) {
+        incomingData = res.data.content;
+      } else if (Array.isArray(res.data?.rooms)) {
+        incomingData = res.data.rooms;
+      }
+
+      setRooms(incomingData);
     } catch (err) {
       console.error('Failed to fetch rooms from backend:', err);
+      setRooms([]); // Error par empty array rakho taaki crash na ho
     } finally {
       setLoading(false);
     }
@@ -179,21 +193,23 @@ _Wishing you a peaceful and productive stay ahead._`;
     }, 1500);
   };
 
-  const filteredRooms = rooms.filter((room) => {
+  // Safe Array wrapper
+  const safeRooms = Array.isArray(rooms) ? rooms : [];
+
+  const filteredRooms = safeRooms.filter((room) => {
     const matchesStatus =
       statusFilter === 'all' ? true : statusFilter === 'paid' ? room.paid : !room.paid;
     const matchesSearch =
-      room.roomNumber.includes(searchTerm) ||
-      room.tenantName.toLowerCase().includes(searchTerm.toLowerCase());
+      (room.roomNumber || '').toString().includes(searchTerm) ||
+      (room.tenantName || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     return matchesStatus && matchesSearch;
   });
 
-  const totalCollected = rooms.reduce((acc, r) => acc + (r.paid ? r.baseRent : 0), 0);
-  const totalPending = rooms.reduce((acc, r) => acc + (!r.paid ? r.baseRent : 0), 0);
-  const paidCount = rooms.filter((r) => r.paid).length;
-  const pendingCount = rooms.length - paidCount;
-
+  const totalCollected = safeRooms.reduce((acc, r) => acc + (r.paid ? (r.baseRent || 0) : 0), 0);
+  const totalPending = safeRooms.reduce((acc, r) => acc + (!r.paid ? (r.baseRent || 0) : 0), 0);
+  const paidCount = safeRooms.filter((r) => r.paid).length;
+  const pendingCount = safeRooms.length - paidCount;
   return (
     <div className="relative min-h-screen font-sans text-stone-800 selection:bg-emerald-100 selection:text-emerald-900 pb-20">
       {/* Background Layer */}
