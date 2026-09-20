@@ -21,32 +21,35 @@ import java.util.List;
 @Slf4j
 public class DataInitializer implements CommandLineRunner {
 
-    private final RoomRepository roomRepository; // '= null' hata diya taaki Spring ise properly inject kare
+    private final RoomRepository roomRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
-        // 1. Seed Users
-        if (userRepository.count() == 0) {
+        // 1. Seed / Ensure Admin User Exists
+        if (userRepository.findByUsername("shailendra").isEmpty()) {
             userRepository.save(User.builder()
                     .username("shailendra")
                     .password(passwordEncoder.encode("shailendra@2026"))
                     .role(Role.ROLE_ADMIN)
                     .enabled(true)
                     .build());
+            log.info("Seeded admin user: shailendra / shailendra@2026");
+        }
 
+        // 2. Seed / Ensure Caretaker Exists
+        if (userRepository.findByUsername("Golu").isEmpty()) {
             userRepository.save(User.builder()
                     .username("Golu")
                     .password(passwordEncoder.encode("golu123"))
                     .role(Role.ROLE_CARETAKER)
                     .enabled(true)
                     .build());
-
-            log.info("Seeded initial users: shailendra (ADMIN) and Golu (CARETAKER)");
+            log.info("Seeded caretaker user: Golu / golu123");
         }
 
-        // 2. Seed 54 Rooms
+        // 3. Seed 54 Rooms (Agar khali ho)
         if (roomRepository.count() == 0) {
             log.info("Seeding 54 rooms for Living Peace Residencies into MySQL...");
             List<Room> rooms = new ArrayList<>();
